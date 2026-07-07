@@ -89,9 +89,10 @@ export default async function RootLayout({ children }: RootLayoutProps) {
         tertiary ? tertiary.variable : "",
         code.variable,
       )}
+      style={{ overflowX: "hidden" }}
     >
       <ToastProvider>
-        <Column style={{ minHeight: "100vh" }} as="body" fillWidth margin="0" padding="0">
+        <Column style={{ minHeight: "100vh", overflowX: "hidden" }} as="body" fillWidth margin="0" padding="0">
           <Background
             mask={{
               cursor: effects.mask.cursor,

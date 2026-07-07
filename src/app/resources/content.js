@@ -1,24 +1,24 @@
 import { InlineCode } from "@/once-ui/components";
 
 const person = {
-  firstName: "Selene",
-  lastName: "Yu",
+  firstName: "Dipanshu",
+  lastName: "Raj",
   get name() {
     return `${this.firstName} ${this.lastName}`;
   },
-  role: "Design Engineer",
+  role: "Software Engineer",
   avatar: "/images/avatar.jpg",
-  location: "Asia/Jakarta", // Expecting the IANA time zone identifier, e.g., 'Europe/Vienna'
-  languages: ["English", "Bahasa"], // optional: Leave the array empty if you don't want to display languages
+  location: "Asia/Kolkata", // Expecting the IANA time zone identifier, e.g., 'Europe/Vienna'
+  languages: ["English", "Hindi"], // optional: Leave the array empty if you don't want to display languages
 };
 
 const newsletter = {
-  display: true,
+  display: false,
   title: <>Subscribe to {person.firstName}'s Newsletter</>,
   description: (
     <>
-      I occasionally write about design, technology, and share thoughts on the intersection of
-      creativity and engineering.
+      I occasionally write about software engineering, competitive programming, and share thoughts on
+      building scalable systems.
     </>
   ),
 };
@@ -29,12 +29,12 @@ const social = [
   {
     name: "GitHub",
     icon: "github",
-    link: "https://github.com/once-ui-system/nextjs-starter",
+    link: "https://github.com/code-dipanshuRaj",
   },
   {
     name: "LinkedIn",
     icon: "linkedin",
-    link: "https://www.linkedin.com/company/once-ui/",
+    link: "https://www.linkedin.com/in/dipanshu-raj-a7478b281/",
   },
   {
     name: "X",
@@ -44,7 +44,7 @@ const social = [
   {
     name: "Email",
     icon: "email",
-    link: "mailto:example@gmail.com",
+    link: "mailto:official.dipanshu.raj@gmail.com",
   },
 ];
 
@@ -52,11 +52,11 @@ const home = {
   label: "Home",
   title: `${person.name}'s Portfolio`,
   description: `Portfolio website showcasing my work as a ${person.role}`,
-  headline: <>Design engineer and builder</>,
+  headline: <>Full stack developer and builder</>,
   subline: (
     <>
-      I'm Selene, a design engineer at <InlineCode>FLY</InlineCode>, where I craft intuitive
-      <br /> user experiences. After hours, I build my own projects.
+      I'm Dipanshu, a CSE undergrad at <InlineCode>IIIT Guwahati</InlineCode>, where I build
+      <br /> full-stack apps, systems-level software, and compete in competitive programming.
     </>
   ),
 };
@@ -73,7 +73,7 @@ const about = {
     display: true,
   },
   calendar: {
-    display: true,
+    display: false,
     link: "https://cal.com",
   },
   intro: {
@@ -81,69 +81,26 @@ const about = {
     title: "Introduction",
     description: (
       <>
-        Selene is a Jakarta-based design engineer with a passion for transforming complex challenges
-        into simple, elegant design solutions. Her work spans digital interfaces, interactive
-        experiences, and the convergence of design and technology.
+        Dipanshu is a Computer Science undergraduate at IIIT Guwahati with a passion for building
+        full-stack applications and systems-level software. His work spans agentic AI chatbots,
+        event-driven servers in C, and production-grade web platforms using Next.js and cloud
+        services. With 800+ problems solved across competitive programming platforms, he brings
+        strong algorithmic thinking to every project.
       </>
     ),
   },
   work: {
-    display: true, // set to false to hide this section
+    display: false, // set to false to hide this section
     title: "Work Experience",
-    experiences: [
-      {
-        company: "FLY",
-        timeframe: "2022 - Present",
-        role: "Senior Design Engineer",
-        achievements: [
-          <>
-            Redesigned the UI/UX for the FLY platform, resulting in a 20% increase in user
-            engagement and 30% faster load times.
-          </>,
-          <>
-            Spearheaded the integration of AI tools into design workflows, enabling designers to
-            iterate 50% faster.
-          </>,
-        ],
-        images: [
-          // optional: leave the array empty if you don't want to display images
-          {
-            src: "/images/projects/project-01/cover-01.jpg",
-            alt: "Once UI Project",
-            width: 16,
-            height: 9,
-          },
-        ],
-      },
-      {
-        company: "Creativ3",
-        timeframe: "2018 - 2022",
-        role: "Lead Designer",
-        achievements: [
-          <>
-            Developed a design system that unified the brand across multiple platforms, improving
-            design consistency by 40%.
-          </>,
-          <>
-            Led a cross-functional team to launch a new product line, contributing to a 15% increase
-            in overall company revenue.
-          </>,
-        ],
-        images: [],
-      },
-    ],
+    experiences: [],
   },
   studies: {
     display: true, // set to false to hide this section
     title: "Studies",
     institutions: [
       {
-        name: "University of Jakarta",
-        description: <>Studied software engineering.</>,
-      },
-      {
-        name: "Build the Future",
-        description: <>Studied online marketing and personal branding.</>,
+        name: "Indian Institute of Information Technology Guwahati",
+        description: <>B.Tech Computer Science Engineering — 2027</>,
       },
     ],
   },
@@ -152,53 +109,72 @@ const about = {
     title: "Technical skills",
     skills: [
       {
-        title: "Figma",
-        description: <>Able to prototype in Figma with Once UI with unnatural speed.</>,
-        // optional: leave the array empty if you don't want to display images
-        images: [
-          {
-            src: "/images/projects/project-01/cover-02.jpg",
-            alt: "Project image",
-            width: 16,
-            height: 9,
-          },
-          {
-            src: "/images/projects/project-01/cover-03.jpg",
-            alt: "Project image",
-            width: 16,
-            height: 9,
-          },
-        ],
+        title: "Languages",
+        description: <>C/C++, Java, Python, JavaScript, TypeScript, SQL</>,
+        images: [],
       },
       {
-        title: "Next.js",
-        description: <>Building next gen apps with Next.js + Once UI + Supabase.</>,
-        // optional: leave the array empty if you don't want to display images
-        images: [
-          {
-            src: "/images/projects/project-01/cover-04.jpg",
-            alt: "Project image",
-            width: 16,
-            height: 9,
-          },
-        ],
+        title: "Frameworks & Libraries",
+        description: <>Next.js, React.js, Node.js, Express.js, Mongoose, MUI</>,
+        images: [],
+      },
+      {
+        title: "Cloud & Databases",
+        description: <>AWS (EC2, S3, RDS, IAM, CloudWatch, Boto3), Google Cloud (OAuth 2.0, Workspace APIs), Appwrite, MongoDB, MySQL, Vercel</>,
+        images: [],
+      },
+      {
+        title: "Tools & Architecture",
+        description: <>Git/GitHub, Linux, Postman, VS Code</>,
+        images: [],
       },
     ],
   },
 };
 
 const blog = {
-  label: "Blog",
-  title: "Writing about design and tech...",
-  description: `Read what ${person.name} has been up to recently`,
-  // Create new blog posts by adding a new .mdx file to app/blog/posts
-  // All posts will be listed on the /blog route
+  label: "CP Profiles",
+  title: "Competitive Programming",
+  description: `Competitive programming profiles and ratings of ${person.name}`,
+  // CP profiles data used by the custom blog page
+  profiles: [
+    {
+      platform: "CodeChef",
+      handle: "dipanshu_rajj",
+      maxRating: 1694,
+      rank: "3 Star",
+      color: "#D29E78",
+      highlight: "Global Rank 104 in Starters 206",
+      link: "https://www.codechef.com/users/dipanshu_rajj",
+      symbol: "🍳",
+    },
+    {
+      platform: "CodeForces",
+      handle: "me.dipanshu",
+      maxRating: 1404,
+      rank: "Specialist",
+      color: "#03A89E",
+      highlight: "Global Rank 3033 in Round 1060 (Div. 2)",
+      link: "https://codeforces.com/profile/me.dipanshu",
+      symbol: "⚡",
+    },
+    {
+      platform: "LeetCode",
+      handle: "user1947NS",
+      maxRating: 1589,
+      rank: "800+ Problems",
+      color: "#FFA116",
+      highlight: "Solved 800+ problems across platforms",
+      link: "https://leetcode.com/u/user1947NS/",
+      symbol: "💻",
+    },
+  ],
 };
 
 const work = {
   label: "Work",
   title: "My projects",
-  description: `Design and dev projects by ${person.name}`,
+  description: `Engineering and dev projects by ${person.name}`,
   // Create new project pages by adding a new .mdx file to app/blog/posts
   // All projects will be listed on the /home and /work routes
 };
