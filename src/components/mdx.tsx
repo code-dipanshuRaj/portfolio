@@ -70,6 +70,16 @@ function createImage({ alt, src, ...props }: SmartImageProps & { src: string }) 
     return null;
   }
 
+  if (src.endsWith(".svg")) {
+    return (
+      <img
+        src={src}
+        alt={alt}
+        style={{ width: "100%", height: "auto", margin: "2rem 0", borderRadius: "0.5rem" }}
+      />
+    );
+  }
+
   return (
     <SmartImage
       className="my-20"
@@ -140,6 +150,7 @@ const components = {
   a: CustomLink as any,
   Table,
   CodeBlock,
+  SmartImage,
 };
 
 type CustomMDXProps = MDXRemoteProps & {

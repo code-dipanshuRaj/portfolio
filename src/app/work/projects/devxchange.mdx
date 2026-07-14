@@ -1,0 +1,58 @@
+---
+title: "DevXchange"
+publishedAt: "2026-07-08"
+summary: "Architected a full-stack Next.js platform utilizing Server Components, accelerating initial page loads by 60% while enabling real-time Q&A synchronization."
+images:
+  - "/images/projects/devxchange/cover-01.png"
+  - "/images/projects/devxchange/cover-02.png"
+  - "/images/projects/devxchange/cover-03.png"
+  - "/images/projects/devxchange/cover-04.png"
+  - "/images/projects/devxchange/cover-05.png"
+  - "/images/projects/devxchange/cover-06.png"
+team:
+  - name: "Dipanshu Raj"
+    role: "Full Stack Engineer"
+    avatar: "/images/avatar.jpg"
+    linkedIn: "https://www.linkedin.com/in/dipanshu-raj/"
+link: "https://dev-x-change.vercel.app/"
+---
+
+## Overview
+
+Architected a full-stack Next.js platform utilizing Server Components, accelerating initial page loads by 50% while enabling real-time Q&A synchronization across clients in under 100ms.
+
+## Key Features
+
+- **Next.js Server Components**: Leveraged the latest React paradigms for highly optimized rendering and blazing fast initial page loads.
+- **Real-Time Data Sync**: Integrated Appwrite to enable real-time synchronization across clients.
+- **Lightning-Fast Search**: Engineered a dynamic search engine indexing 1,200+ records with flexible tag and category-based filtering queries executing in under 32ms.
+- **Beautiful UI**: Designed using MagicUI and deployed on Vercel for a premium user experience.
+
+## Video Demonstration
+<SmartImage src="/images/projects/devxchange/demo.mp4" alt="DevXchange Video Demo" enlarge />
+
+## Building a Scalable Q&A Ecosystem
+DevXchange is a full-stack knowledge-sharing platform engineered to handle relational data, nested states, and complex user interactions. Inspired by Stack Overflow, I architected this project from the ground up to prioritize SEO, data integrity, and a seamless developer experience.
+### The Architecture: A Hybrid Full-Stack Approach
+The architecture is built on a modern, decoupled stack utilizing **Next.js (App Router)**, **React 19**, and **Appwrite** as the Backend-as-a-Service (BaaS). The core design philosophy relies on a **Hybrid Security and Data Fetching Model**. 
+To maximize SEO and First Contentful Paint (FCP) for questions and feeds, Next.js Server Components are used to query the Appwrite database directly. This ensures search engines index fully rendered HTML. Conversely, highly interactive elements—like the Markdown editor and voting mechanisms—are isolated as Client Components. 
+State mutations (like answering a question or casting a vote) bypass direct client-to-database communication. Instead, they route through secure Next.js API endpoints utilizing the server-side SDK (`node-appwrite`) to enforce authorization and prevent race conditions.
+Here is a high-level flowchart of how the components interact:
+
+![Architecture](/assets/devXchange.svg)
+
+### Core Features Deep-Dive
+Building a developer-centric platform required focusing heavily on the writing experience, secure sessions, and maintaining strict data integrity.
+*   **Markdown-First Editing:** Developers communicate via code. The integration of `@uiw/react-md-editor` provides a robust, Markdown-native writing experience. The architecture isolates the heavy Markdown parsing logic from the main application thread to prevent UI blocking during extensive text entry.
+*   **Robust Session Management:** Security and state persistence are paramount. The authentication flow utilizes secure Appwrite sessions. The frontend **Zustand store** (enhanced with the `persist` middleware) handles the hydration of this session across reloads. To prevent race conditions during rapid page navigation, the store implements a strict locking mechanism (`isVerifying`) that ensures only one active session validation request is sent to the server at a time, preventing "session already active" backend errors.
+*   **Secure Reputation System:** The platform calculates reputation dynamically based on user interactions. When a vote is cast, the client does not dictate the outcome. Instead, it sends the request to a Next.js API route where the server strictly validates the active session, calculates the net reputation shift (handling toggling or withdrawing votes securely), and atomically updates the Appwrite database before returning the new state to the client.
+
+### Performance Optimization & Best Practices
+As a solo developer, my focus for optimization was on implementing architectural best practices that prevent performance bottlenecks before they occur, ensuring a snappy experience.
+*   **Singleton Connection Pooling:** Instantiating a new database client for every Next.js API request causes massive memory and network overhead. I implemented a **Singleton connection pattern** for the server-side Appwrite client (`models/server/config.ts`). This ensures that Serverless API functions reuse a single persistent connection to the Appwrite instance, drastically reducing the TLS handshake and instantiation overhead.
+*   **Mitigating the N+1 Query Problem:** Q&A feeds are notorious for N+1 query issues. To combat this, the data fetching layer heavily utilizes `Promise.all()` to resolve independent data fetching streams in parallel (such as simultaneously fetching upvotes and downvotes to calculate a final score). This significantly reduces the Time-To-First-Byte (TTFB) on data-heavy endpoints.
+*   **Immutable State with Immer:** On the client side, handling deeply nested state (like a thread of comments within an answer) can cause severe React re-rendering performance hits. By wrapping the Zustand store in **Immer**, all state mutations are handled as immutable drafts. This guarantees that React only re-renders the exact DOM nodes that changed, rather than the entire component tree.
+*   **Database Indexing:** To ensure search queries remain performant as the database grows, I configured **Full-Text Indexes** on the `title` and `content` attributes within the Appwrite database layer. This allows the backend to perform fast lexical searches rather than expensive table scans.
+## Links
+- **Live Application**: [https://dev-x-change.vercel.app/](https://dev-x-change.vercel.app/)
+- **GitHub Repository**: [devXchange](https://github.com/code-dipanshuRaj/devXchange)

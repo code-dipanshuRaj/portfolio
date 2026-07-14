@@ -225,7 +225,7 @@ export default function Blog() {
           />
           <Column horizontal="center" gap="4">
             <Text variant="display-strong-m" style={{ color: "#FFA116" }}>
-              1589
+              1640
             </Text>
             <Text variant="body-default-s" onBackground="neutral-weak">
               LeetCode Max

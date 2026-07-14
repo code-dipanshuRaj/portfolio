@@ -161,7 +161,7 @@ const blog = {
     {
       platform: "LeetCode",
       handle: "user1947NS",
-      maxRating: 1589,
+      maxRating: 1640,
       rank: "800+ Problems",
       color: "#FFA116",
       highlight: "Solved 800+ problems across platforms",

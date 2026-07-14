@@ -1,0 +1,97 @@
+---
+title: "Multi-Client Chat Application"
+publishedAt: "2026-07-09"
+summary: "Engineered a single-threaded, event-driven TCP server in C using epoll, seamlessly handling 2,048 concurrent connections with sub-second registration times."
+images:
+  - "/images/projects/multi-client-chat-application/cover-01.png"
+  - "/images/projects/multi-client-chat-application/cover-02.png"
+  - "/images/projects/multi-client-chat-application/cover-03.png"
+team:
+  - name: "Dipanshu Raj"
+    role: "Backend Engineer"
+    avatar: "/images/avatar.jpg"
+    linkedIn: "https://www.linkedin.com/in/dipanshu-raj/"
+---
+
+## Video Demonstration
+
+![Chat Application Video Demo](/images/projects/multi-client-chat-application/demo.mp4)
+
+Building a highly scalable chat server is a classic network engineering challenge. Rather than relying on the traditional and often inefficient "thread per-connection" model, I engineered a **single threaded, event-driven TCP server** in C from scratch. 
+My primary goal was to push the limits of network concurrency on a single core, diving deep into Linux kernel APIs, socket programming, and memory-safe state management.
+![Complete Architecture](/assets/complete.svg)
+
+
+## The Architecture: Event-Driven Concurrency
+In a standard multi-threaded server, each new client connection spawns a new thread. While conceptually simple, this architecture fails at scale due to massive RAM consumption and CPU context-switching overhead. 
+To solve this, I designed the server around the Linux `epoll` API combined with non-blocking I/O.
+![Connection and Event Loop Lifecycle](/assets/Connection-And-EventLoop-Lifecycle.svg)
+The core of the server is a single, infinite event loop centered around `epoll_wait()`. When the server starts, it registers a non-blocking `listen_fd`. The event loop puts the CPU to sleep until network activity occurs. 
+* **New Connections:** When `epoll` detects activity on the `listen_fd`, the server calls `accept()`, instantly sets the new client socket to non-blocking via `fcntl()`, and registers it into the `epoll` instance.
+* **Active I/O:** When `epoll` detects activity on a `client_fd`, the server executes a non-blocking `read()` or `write()`.
+* **State Management:** Connection states are maintained in a pre-allocated $O(1)$ lookup array (`clients_by_fd`), mapping active file descriptors directly to their respective buffer states, eliminating the need for expensive hash-map traversals.
+This architecture allows a single thread to juggle thousands of connections simultaneously with virtually zero idle overhead.
+## Performance Metrics at Scale
+![Performance Latency Metrics](/assets/performance-metrics.jpg)
+To validate the architecture, I built a custom, multi-threaded C stress-testing tool using `pthread` barriers to simulate a "thundering herd" of concurrent users. 
+The event-driven model proved incredibly resilient under extreme load:
+* **Massive Concurrency:** Seamlessly handled **2,048 simultaneous TCP connections** without a single dropped connection or segmentation fault.
+* **Sub-Second Registration:** Processed aggressive traffic spikes (thousands of users sending `NICK` registration commands simultaneously) in **< 1 second**.
+* **Ultra-Low Latency:** Achieved an average broadcast delivery latency of **56.7ms** (P95: 103.5ms) while distributing messages across a cluster of 2,000+ clients. 
+
+
+## Challenges Overcome
+Building an asynchronous server from scratch meant dealing with complex edge cases typically abstracted away by high-level frameworks.
+
+### 1. TCP Stream Fragmentation & Application-Layer Framing
+TCP is a stream protocol, not a message protocol. During load testing, I discovered that a single `send()` from a client does not guarantee a single `read()` on the server. A client's message could arrive fragmented in multiple tiny packets, or multiple messages could arrive coalesced into a single large packet.
+![Sequence Diagram](/assets/sequence-diagram.svg)
+To prevent the server from misinterpreting partial data, I engineered robust **application-layer framing**. 
+Every client maintains a persistent memory buffer. Incoming bytes are appended to this buffer, and the server continuously scans for a frame delimiter (`\n`). 
+```c
+// Non-blocking read into a persistent per-client buffer
+ssize_t count = read(fd, c->buf + c->buf_len, sizeof(c->buf) - c->buf_len - 1);
+if (count > 0) {
+    c->buf_len += count;
+    c->buf[c->buf_len] = '\0';
+    
+    char *start = c->buf;
+    char *newline;
+    
+    // Application-layer framing: Process only complete messages
+    while ((newline = strchr(start, '\n')) != NULL) {
+        size_t linelen = newline - start + 1;
+        process_line(epfd, c, start); // Route the complete message
+        start = newline + 1;
+    }
+    
+    // Shift any remaining partial bytes to the front of the buffer
+    int leftover = c->buf + c->buf_len - start;
+    if (leftover > 0 && start != c->buf) {
+        memmove(c->buf, start, leftover);
+    }
+    c->buf_len = leftover;
+}
+```
+This `memmove()` logic ensures that partial packets are safely buffered until the rest of the stream arrives, rendering the server completely immune to network fragmentation.
+
+### 2. Message Routing and Business Logic
+Once a complete message frame is successfully extracted, the server must route it without blocking the event loop.
+![Message Routing and Business Logic](/assets/Message-Routing-And-Business-Logic.svg)
+The router checks the connection state to ensure the user is registered (via the `NICK` command). Once authenticated, it routes private messages (`/msg`) via an $O(N)$ lookup over active file descriptors, enumerates users (`/list`), or broadcasts global messages to all connected clients. 
+
+### 3. The `EAGAIN` Deadlock and Buffer Exhaustion
+When broadcasting a message to 2,000 clients simultaneously, I encountered a severe bottleneck: slower clients would fill up their OS-level TCP receive windows. When the server attempted to `send()` to these full buffers, the non-blocking socket would return an `EAGAIN` (try again) error.
+Initially, the server was configured to synchronously `poll()` the socket, waiting for space to free up. However, in a single-threaded architecture, pausing the main thread for even a fraction of a second halted the *entire server*, causing cascading timeouts across thousands of connections. 
+I resolved this by refactoring the `safe_send()` loop to strictly drop messages upon encountering `EAGAIN` (or, in a production scenario, push them to an asynchronous outbound queue). This guaranteed the event loop remained unblocked, resulting in a perfectly non-blocking execution path.
+
+### 4. Graceful Teardowns and `SIGPIPE` Prevention
+When a client abruptly terminates their connection while the server is mid-broadcast, writing to the closed socket triggers a `SIGPIPE` signal from the Linux kernel, which instantly kills the server process. 
+I engineered memory-safe connection states by applying the `MSG_NOSIGNAL` flag to all outbound writes and explicitly ignoring `SIGPIPE`. Furthermore, when a client disconnection is detected (via `read() == 0`), the server executes a strict teardown sequence: removing the socket from `epoll`, freeing the `client_t` struct, and releasing the file descriptor back to the OS, ensuring zero memory leaks over the server's lifecycle.
+
+## Conclusion
+Building this event-driven chat server was a phenomenal deep dive into systems programming. It reinforced the importance of non-blocking I/O, the intricacies of TCP stream management, and the raw performance benefits of $O(1)$ event loops like `epoll`.
+
+## Links
+
+- **GitHub Repository**: [chat-server-in-C](https://github.com/code-dipanshuRaj/chat-server-in-C)

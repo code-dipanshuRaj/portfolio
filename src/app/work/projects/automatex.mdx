@@ -1,0 +1,91 @@
+---
+title: "automateX"
+publishedAt: "2026-07-10"
+summary: "Engineered an agentic chatbot leveraging Google Workspace APIs to automate complex workflows (Gmail, Calendar, Tasks), reducing multi-step manual execution time by an estimated 60%."
+images:
+  - "/images/projects/automatex/cover-01.png"
+  - "/images/projects/automatex/cover-02.png"
+  - "/images/projects/automatex/cover-03.png"
+  - "/images/projects/automatex/cover-04.png"
+  - "/images/projects/automatex/cover-05.png"
+  - "/images/projects/automatex/cover-06.png"
+team:
+  - name: "Dipanshu Raj"
+    role: "Full Stack Developer"
+    avatar: "/images/avatar.jpg"
+    linkedIn: "https://www.linkedin.com/in/dipanshu-raj/"
+---
+
+## Overview
+
+Engineered an agentic chatbot leveraging Google Workspace APIs to automate complex workflows (Gmail, Calendar, Tasks), reducing multi-step manual execution time by an estimated 60%.
+
+## Key Features
+
+- **Agentic Workflow Automation**: Integrated with Google Workspace APIs to seamlessly automate complex tasks.
+- **LLM Orchestration Engine**: Designed an LLM orchestration engine utilizing function calling for semantic routing.
+- **High-Speed Execution**: Achieved an average end-to-end response time of 5.5s.
+- **Advanced Architecture**: Incorporated RAG (Retrieval-Augmented Generation) and dynamic OAuth scope enforcement.
+
+## Video Demonstration
+
+![automateX Video Demo](/images/projects/automatex/demo.mp4)
+
+## Overview
+AutomateX is an agentic workflow automation platform designed to execute complex, cross-service actions within Google Workspace (Gmail, Calendar, and Tasks) purely through natural language. 
+Instead of relying on rigid, rules-based intent classifiers, AutomateX leverages an autonomous LLM orchestration engine. The system dynamically routes user prompts, enforces strict OAuth 2.0 permissions on the fly, and utilizes a Human-In-The-Loop (HITL) architecture to guarantee safety before performing any destructive API actions.
+
+![Architecture](/assets/automateX.svg)
+
+## The Architecture: Agentic Semantic Routing
+The core innovation of AutomateX lies in its departure from traditional NLU (Natural Language Understanding) pipelines. Early iterations explored standard intent classification (e.g., mapping "schedule a meeting" to a predefined router), but this proved too brittle for multi-step, contextual queries.
+Instead, the platform uses **LLM Function Calling as a Semantic Router**.
+When a user submits a query via the Node.js/Express orchestrator, the system constructs a highly dynamic system prompt. This prompt injects JSON schemas defining available tools (e.g., `create_calendar_event`, `send_email`) directly into the context of the Gemini LLM. 
+```typescript
+// Tool declarations act as our semantic routing destinations
+const TOOL_DECLARATIONS = [
+  {
+    name: 'create_calendar_event',
+    description: 'Create a new Google Calendar event.',
+    parameters: { /* JSON Schema for start, end, summary */ },
+  },
+  {
+    name: 'send_email',
+    description: 'Send an email via Gmail.',
+    parameters: { /* JSON Schema for to, subject, body */ },
+  }
+];
+```
+The LLM evaluates the user's intent natively. If the query requires an action, Gemini emits a structured function call payload. The orchestrator intercepts this call—acting as the deterministic controller—and translates it into an execution plan.
+To prevent hallucinations from causing unintended side effects (like sending a half-written email to a boss), AutomateX employs a **Human-In-The-Loop (HITL) execution model**. The LLM never touches the Google APIs directly; it only proposes a `PlanDoc`. The user must review and approve the pending plan on the frontend before the backend executes the authenticated API requests.
+## Performance & Impact
+By automating what would normally require context-switching across three different Google Workspace tabs, AutomateX reduces multi-step manual execution time by an estimated **60%**.
+A major focus during development was minimizing the latency inherently introduced by LLM generation. AutomateX achieves an average end-to-end response time of just **~2.6 seconds**. This performance was achieved by:
+- **Parallelizing Context Retrieval:** RAG queries are fired concurrently with user session state hydration.
+- **Optimized Prompting:** Keeping the system prompt lean and strictly defining tool parameters reduces the token generation overhead for the LLM.
+- **Streaming Tool Evaluation:** The tool-calling loop aggressively breaks after the first valid action payload is identified, immediately passing the proposed plan back to the client.
+## Challenges Overcome
+### 1. Dynamic OAuth 2.0 Scope Enforcement
+A significant engineering hurdle was handling API permissions dynamically. If a user asked the bot to send an email, but hadn't yet granted the `gmail.send` OAuth scope, a naive implementation would result in a hard API failure during execution.
+To solve this, I built a dynamic scope enforcement mechanism directly into the LLM's system prompt. The orchestrator queries the database for the user's currently granted scopes and injects them into the prompt instructions:
+```typescript
+// System prompt dynamically injects granted scopes
+const systemPrompt = `
+  You have access to tools for Calendar, Gmail, and Tasks.
+  The user's currently granted OAuth scopes are:
+  \${user.grantedScopes.join('\\n')}
+  
+  If a required scope is NOT in this list, you MUST call the 
+  'request_missing_scope' tool. Do NOT call the action tool.
+`;
+```
+If the LLM realizes it lacks the required permission, it autonomously routes to `request_missing_scope`. The backend intercepts this specific tool call and pauses the conversation, prompting the user with a Google OAuth consent screen before continuing the workflow.
+### 2. Seamless RAG Integration
+AutomateX also supports querying personal knowledge bases, which required integrating Retrieval-Augmented Generation (RAG) into the agentic flow without breaking the function-calling logic.
+I deployed a lightweight Python FastAPI microservice dedicated to embedding generation and vector search. Before the user's prompt hits the LLM, the Node orchestrator pings the RAG service to fetch top-k semantic contexts. This context is prepended to the prompt.
+The challenge was ensuring the LLM could distinguish between *answering a question based on RAG context* versus *executing a tool*. By heavily iterating on the system prompt instructions, the model successfully learned to synthesize RAG data (e.g., "What time is my flight according to my itinerary document?") and pipe that extracted data directly into a tool payload (e.g., `create_calendar_event` for the flight).
+
+
+## Links
+
+- **GitHub Repository**: [automateX](https://github.com/code-dipanshuRaj/automateX)

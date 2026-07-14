@@ -97,7 +97,7 @@ export default function Home() {
         </Column>
       </Column>
       <RevealFx translateY="16" delay={0.6}>
-        <Projects />
+        <Projects range={[1, 3]} />
       </RevealFx>
       {newsletter.display && <Mailchimp newsletter={newsletter} />}
     </Column>
