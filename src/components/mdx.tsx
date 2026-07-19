@@ -138,6 +138,25 @@ function createParagraph({ children }: TextProps) {
   );
 }
 
+function createPre({ children, ...props }: any) {
+  return (
+    <div
+      style={{
+        maxWidth: "100%",
+        overflowX: "auto",
+        margin: "1.5rem 0",
+        borderRadius: "0.5rem",
+        backgroundColor: "var(--neutral-alpha-weak)",
+        padding: "1rem",
+      }}
+    >
+      <pre {...props} style={{ margin: 0, minWidth: "min-content" }}>
+        {children}
+      </pre>
+    </div>
+  );
+}
+
 const components = {
   p: createParagraph as any,
   h1: createHeading(1) as any,
@@ -148,6 +167,7 @@ const components = {
   h6: createHeading(6) as any,
   img: createImage as any,
   a: CustomLink as any,
+  pre: createPre as any,
   Table,
   CodeBlock,
   SmartImage,

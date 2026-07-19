@@ -15,7 +15,7 @@ team:
 
 ## Video Demonstration
 
-![Chat Application Video Demo](/images/projects/multi-client-chat-application/demo.mp4)
+![Chat Application Video Demo](https://youtu.be/eZQf4K6cYOQ)
 
 Building a highly scalable chat server is a classic network engineering challenge. Rather than relying on the traditional and often inefficient "thread per-connection" model, I engineered a **single threaded, event-driven TCP server** in C from scratch. 
 My primary goal was to push the limits of network concurrency on a single core, diving deep into Linux kernel APIs, socket programming, and memory-safe state management.
@@ -32,7 +32,7 @@ The core of the server is a single, infinite event loop centered around `epoll_w
 * **State Management:** Connection states are maintained in a pre-allocated $O(1)$ lookup array (`clients_by_fd`), mapping active file descriptors directly to their respective buffer states, eliminating the need for expensive hash-map traversals.
 This architecture allows a single thread to juggle thousands of connections simultaneously with virtually zero idle overhead.
 ## Performance Metrics at Scale
-![Performance Latency Metrics](/assets/performance-metrics.jpg)
+![Performance Latency Metrics](/assets/chat_app_test.png)
 To validate the architecture, I built a custom, multi-threaded C stress-testing tool using `pthread` barriers to simulate a "thundering herd" of concurrent users. 
 The event-driven model proved incredibly resilient under extreme load:
 * **Massive Concurrency:** Seamlessly handled **2,048 simultaneous TCP connections** without a single dropped connection or segmentation fault.
